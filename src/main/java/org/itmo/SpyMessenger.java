@@ -14,6 +14,7 @@ class SpyMessenger {
         public String message;
         public String passcode;
         public LocalDateTime sendTime;
+        public boolean forceDelete;
     };
 
     Map<String, List<Message>> inbox; // index from receiver -> [Message]
@@ -24,6 +25,7 @@ class SpyMessenger {
         m.receiver = receiver;
         m.message = message;
         m.passcode = passcode;
+        m.forceDelete = false;
         m.sendTime = LocalDateTime.now();
 
         List<Message> ms = inbox.get(receiver);
@@ -49,10 +51,12 @@ class SpyMessenger {
         for (int i = 0; i < ms.size(); i++) {
             Message m = ms.get(i);
             if (m.passcode.equals(passcode)) {
-                if (ChronoUnit.MILLIS.between(m.sendTime, LocalDateTime.now()) > 1500) {
+                if (m.forceDelete || ChronoUnit.MILLIS.between(m.sendTime, LocalDateTime.now()) > 1500) {
+                    m.forceDelete = true;
                     return "";
                 }
                 else {
+                    m.forceDelete = true;
                     return m.message;
                 }
             }
